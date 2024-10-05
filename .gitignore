@@ -1,0 +1,13 @@
+# Binaries
+**/*.exe
+**/*.dll
+**/*.so
+**/*.dylib
+
+# Build directory
+/target/
+
+# Other files
+**/*.log
+**/*.tmp
+.DS_Store
