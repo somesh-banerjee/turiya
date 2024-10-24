@@ -2,17 +2,27 @@
 #![no_std]
 // disable all Rust-level entry points
 #![no_main]
+// enable custom test framework
+#![feature(custom_test_frameworks)]
+// reexport the test harness to use our test_runner instead of the default one
+#![test_runner(turiya::test_runner)]
+#![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
+use turiya::println;
 
-// import the vga_buffer module
-mod vga_buffer;
-
+#[cfg(not(test))]
 /// This function is called on panic. originally found in std but we are using no_std env
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
-    println!("{}", info);
+    println!("{}", _info);
     loop {}
+}
+
+#[cfg(test)]
+#[panic_handler]
+fn panic(info: &PanicInfo) -> ! {
+    turiya::test_panic_handler(info)
 }
 
 // overwriting the entrypoint
@@ -20,7 +30,15 @@ fn panic(_info: &PanicInfo) -> ! {
 #[no_mangle]
 // _start is default entrypoint for most systems
 pub extern "C" fn _start() -> ! {
+    println!("Hello World{}", "!");
 
-    println!("Hello World{}", "!");    
+    #[cfg(test)]
+    test_main();
+
     loop {}
+}
+
+#[test_case]
+fn trivial_assertion() {
+    assert_eq!(1, 1);
 }

@@ -199,3 +199,30 @@ pub fn _print(args: fmt::Arguments) {
     use core::fmt::Write;
     WRITER.lock().write_fmt(args).unwrap();
 }
+
+// test the VGA buffer implementation
+#[test_case]
+fn test_println_simple() {
+    println!("test_println_simple output");
+}
+
+
+// test multiple println calls
+#[test_case]
+fn test_println_many() {
+    for _ in 0..200 {
+        println!("test_println_many output");
+    }
+}
+
+// test printing a string that fits on a single line
+#[test_case]
+fn test_println_output() {
+    let s = "Some test string that fits on a single line";
+    println!("{}", s);
+    for (i, c) in s.chars().enumerate() {
+        let screen_char = WRITER.lock().buffer.chars[BUFFER_HEIGHT - 2][i].read();
+        // check that the character in the buffer matches the character in the string
+        assert_eq!(char::from(screen_char.ascii_character), c);
+    }
+}
