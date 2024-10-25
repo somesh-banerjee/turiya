@@ -9,6 +9,8 @@
 // reexport the test harness to use our test_runner 
 // instead of the default one
 #![reexport_test_harness_main = "test_main"]
+// to use x86-interrupt calling convention
+#![feature(abi_x86_interrupt)]
 
 pub mod serial;
 pub mod vga_buffer;
@@ -55,6 +57,7 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
 #[no_mangle]
 // need a start here because lib.rs is tested independently
 pub extern "C" fn _start() -> ! {
+    init();
     test_main();
     loop {}
 }
@@ -80,4 +83,10 @@ pub fn exit_qemu(exit_code: QemuExitCode) {
         let mut port = Port::new(0xf4);
         port.write(exit_code as u32);
     }
+}
+
+pub mod interrupts;
+
+pub fn init() {
+    interrupts::init_idt();
 }

@@ -31,9 +31,16 @@ fn panic(info: &PanicInfo) -> ! {
 // _start is default entrypoint for most systems
 pub extern "C" fn _start() -> ! {
     println!("Hello World{}", "!");
+    
+    turiya::init(); 
+
+    // invoke a breakpoint exception
+    x86_64::instructions::interrupts::int3();
 
     #[cfg(test)]
     test_main();
+
+    println!("It did not crash!");
 
     loop {}
 }
