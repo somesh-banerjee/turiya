@@ -91,4 +91,9 @@ pub mod interrupts;
 pub fn init() {
     gdt::init();
     interrupts::init_idt();
+    unsafe {
+        interrupts::PICS.lock().initialize();
+    }
+    // enable interrupts i.e. cpu listens to interrupt controller
+    x86_64::instructions::interrupts::enable();
 }
