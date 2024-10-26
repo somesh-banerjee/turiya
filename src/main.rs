@@ -34,8 +34,21 @@ pub extern "C" fn _start() -> ! {
     
     turiya::init(); 
 
+    fn stack_overflow() {
+        stack_overflow(); // for each recursion, the return address is pushed
+    }
+
+    // trigger a stack overflow
+    // stack_overflow();
+
     // invoke a breakpoint exception
-    x86_64::instructions::interrupts::int3();
+    // x86_64::instructions::interrupts::int3();
+
+    // trigger a page fault
+    // unsafe {
+    //     // the address 0xdeadbeef is never mapped i.e. invalid address
+    //     *(0xdeadbeef as *mut u64) = 42;
+    // };
 
     #[cfg(test)]
     test_main();
