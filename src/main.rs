@@ -16,7 +16,7 @@ use turiya::println;
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
     println!("{}", _info);
-    loop {}
+    turiya::hlt_loop();
 }
 
 #[cfg(test)]
@@ -55,7 +55,9 @@ pub extern "C" fn _start() -> ! {
 
     println!("It did not crash!");
 
-    loop {}
+    // use the hlt_loop to halt the CPU instead of infinite loop
+    // this is because the CPU will keep running the loop and consume power
+    turiya::hlt_loop();
 }
 
 #[test_case]

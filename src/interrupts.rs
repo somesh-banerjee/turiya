@@ -32,6 +32,8 @@ lazy_static! {
         // idt implements Index trait so we can use it as an array
         idt[InterruptIndex::Timer.as_usize()]
             .set_handler_fn(timer_interrupt_handler);
+        idt[InterruptIndex::Keyboard.as_usize()]
+            .set_handler_fn(keyboard_interrupt_handler);
         idt
     };
 }
@@ -60,6 +62,56 @@ extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFr
     }
 }
 
+extern "x86-interrupt" fn keyboard_interrupt_handler(
+    _stack_frame: InterruptStackFrame)
+{
+    use x86_64::instructions::port::Port;
+    use pc_keyboard::{layouts, DecodedKey, HandleControl, Keyboard, ScancodeSet1};
+    use spin::Mutex;
+
+    // lazy_static is used to initialize the keyboard only once
+    // protected by a spinlock to ensure safe access
+    lazy_static! {
+        // keyboard is a Mutex because it is shared between multiple interrupts
+        static ref KEYBOARD: Mutex<Keyboard<layouts::Us104Key, ScancodeSet1>> = 
+            // scancode set 1 is the default scancode set for most keyboards
+            // US104Key is the layout for a US keyboard with 104 keys
+            Mutex::new(Keyboard::new(ScancodeSet1::new(),
+            // hamdle control is used to handle control characters
+            // we ignore them here and treat them as normal characters
+                layouts::Us104Key, HandleControl::Ignore)
+            );
+    }
+
+    // on each interrupt, lock the keyboard, read the scancode and process it
+    let mut keyboard = KEYBOARD.lock();
+
+    // read scancode from the keyboard port
+    // 0x60 is the port number for the keyboard
+    let mut port = Port::new(0x60);
+    // read scancode from the keyboard port is important
+    // otherwise the keyboard will not work next time
+    let scancode: u8 = unsafe { port.read() };
+
+    // get the key from the scancode using a match statement
+    if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
+        // add_byte translates scancodes into key events
+        // key events have detailed information about the key & if pressed/released
+        if let Some(key) = keyboard.process_keyevent(key_event) {
+            // process_keyevent translates key events into characters if possible
+            match key {
+                DecodedKey::Unicode(character) => print!("{}", character),
+                DecodedKey::RawKey(key) => print!("{:?}", key),
+            }
+        }
+    }
+
+    unsafe {
+        PICS.lock()
+            .notify_end_of_interrupt(InterruptIndex::Keyboard.as_u8());
+    }
+}
+
 #[test_case]
 fn test_breakpoint_exception() {
     // invoke a breakpoint exception
@@ -70,6 +122,7 @@ fn test_breakpoint_exception() {
 #[repr(u8)]
 pub enum InterruptIndex {
     Timer = PIC_1_OFFSET,
+    Keyboard, // default value is +1 of previous so no need to specify
 }
 
 impl InterruptIndex {
