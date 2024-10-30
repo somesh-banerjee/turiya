@@ -12,6 +12,7 @@ Most of the code is based on the [Writing an OS in Rust](https://os.phil-opp.com
 - [x] CPU Exceptions
 - [x] Interrupts
 - [x] Keyboard Input
+- [x] Paging
 
 ## Setup
 

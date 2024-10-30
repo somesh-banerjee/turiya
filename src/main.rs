@@ -50,6 +50,20 @@ pub extern "C" fn _start() -> ! {
     //     *(0xdeadbeef as *mut u64) = 42;
     // };
 
+    // trigger a general protection fault
+    // let ptr = 0x20426c as *mut u8;
+    // unsafe { let x = *ptr; } // works because we are trying to read from a data page
+    // println!("read worked");
+
+    // // write to a code page
+    // unsafe { *ptr = 42; } // gives a exception because we are trying to write to a code page
+    // println!("write worked");
+
+    use x86_64::registers::control::Cr3;
+
+    let (level_4_page_table, _) = Cr3::read();
+    println!("Level 4 page table at: {:?}", level_4_page_table.start_address());
+
     #[cfg(test)]
     test_main();
 
