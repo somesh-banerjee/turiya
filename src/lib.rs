@@ -16,11 +16,13 @@ pub mod serial;
 pub mod vga_buffer;
 pub mod gdt;
 pub mod memory;
+pub mod allocator;
 
 use core::panic::PanicInfo;
 #[cfg(test)]
 use bootloader::{entry_point, BootInfo};
 
+extern crate alloc;
 pub trait Testable {
     fn run(&self) -> ();
 }
