@@ -13,6 +13,7 @@ Most of the code is based on the [Writing an OS in Rust](https://os.phil-opp.com
 - [x] Interrupts
 - [x] Keyboard Input
 - [x] Paging
+- [x] Heap Allocator designs
 
 ## Setup
 
