@@ -109,6 +109,10 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     core::mem::drop(reference_counted);
     println!("reference count is {} now", Rc::strong_count(&cloned_reference));
 
+    let mut executor = turiya::task::simple_executor::SimpleExecutor::new();
+    executor.spawn(turiya::task::Task::new(example_task()));
+    executor.run();
+
     #[cfg(test)]
     test_main();
 
@@ -122,4 +126,14 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
 #[test_case]
 fn trivial_assertion() {
     assert_eq!(1, 1);
+}
+
+// async function that returns a future
+async fn example_task() {
+    let number = async_number().await;
+    println!("async number: {}", number);
+}
+
+async fn async_number() -> u32 {
+    42
 }
