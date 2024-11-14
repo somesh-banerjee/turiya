@@ -93,19 +93,24 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(
     // read scancode from the keyboard port is important
     // otherwise the keyboard will not work next time
     let scancode: u8 = unsafe { port.read() };
-
-    // get the key from the scancode using a match statement
-    if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
-        // add_byte translates scancodes into key events
-        // key events have detailed information about the key & if pressed/released
-        if let Some(key) = keyboard.process_keyevent(key_event) {
-            // process_keyevent translates key events into characters if possible
-            match key {
-                DecodedKey::Unicode(character) => print!("{}", character),
-                DecodedKey::RawKey(key) => print!("{:?}", key),
-            }
-        }
-    }
+    
+    // // get the key from the scancode using a match statement
+    // if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
+        //     // add_byte translates scancodes into key events
+        //     // key events have detailed information about the key & if pressed/released
+        //     if let Some(key) = keyboard.process_keyevent(key_event) {
+            //         // process_keyevent translates key events into characters if possible
+    //         match key {
+    //             DecodedKey::Unicode(character) => print!("{}", character),
+    //             DecodedKey::RawKey(key) => print!("{:?}", key),
+    //         }
+    //     }
+    // }
+    
+    // the above code is replaced by the following code
+    // which is more efficient and less error-prone
+    // it uses async/await to handle the keyboard input
+    crate::task::keyboard::add_scancode(scancode);
 
     unsafe {
         PICS.lock()
