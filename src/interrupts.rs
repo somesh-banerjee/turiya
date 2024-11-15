@@ -67,7 +67,7 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(
     _stack_frame: InterruptStackFrame)
 {
     use x86_64::instructions::port::Port;
-    use pc_keyboard::{layouts, DecodedKey, HandleControl, Keyboard, ScancodeSet1};
+    use pc_keyboard::{layouts, HandleControl, Keyboard, ScancodeSet1};
     use spin::Mutex;
 
     // lazy_static is used to initialize the keyboard only once
@@ -85,7 +85,7 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(
     }
 
     // on each interrupt, lock the keyboard, read the scancode and process it
-    let mut keyboard = KEYBOARD.lock();
+    // let mut keyboard = KEYBOARD.lock();
 
     // read scancode from the keyboard port
     // 0x60 is the port number for the keyboard

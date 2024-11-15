@@ -12,7 +12,7 @@ use core::panic::PanicInfo;
 use turiya::println;
 use bootloader::{BootInfo, entry_point};
 use alloc::{boxed::Box, vec, vec::Vec, rc::Rc};
-use turiya::task::{Task, simple_executor, keyboard};
+use turiya::task::{Task, executor, keyboard};
 
 extern crate alloc;
 
@@ -110,7 +110,7 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     core::mem::drop(reference_counted);
     println!("reference count is {} now", Rc::strong_count(&cloned_reference));
 
-    let mut executor = simple_executor::SimpleExecutor::new();
+    let mut executor = executor::Executor::new();
     executor.spawn(Task::new(example_task()));
     executor.spawn(Task::new(keyboard::print_keypresses()));
     executor.run();
@@ -118,11 +118,12 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     #[cfg(test)]
     test_main();
 
-    println!("It did not crash!");
+    // println!("It did not crash!");
 
     // use the hlt_loop to halt the CPU instead of infinite loop
     // this is because the CPU will keep running the loop and consume power
-    turiya::hlt_loop();
+    // turiya::hlt_loop();
+    // not needed because the run_ready_tasks function will never return
 }
 
 #[test_case]
